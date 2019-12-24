@@ -1,0 +1,92 @@
+<html>
+
+<head>
+	<script src="https://code.jquery.com/jquery-3.4.1.min.js"
+		integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+</head>
+
+<body>
+	<span id="q">...</span>
+	<br />
+	<button type="button" id="a" onclick="setAnswer(1)">...</button>
+	<br />
+	<button type="button" id="b" onclick="setAnswer(2)">...</button>
+	<br />
+	<button type="button" id="c" onclick="setAnswer(3)">...</button>
+	<br />
+	<button type="button" id="d" onclick="setAnswer(4)">...</button>
+	<br />
+	<button type="button" id="e" onclick="setAnswer(5)">...</button>
+	<br />
+	<button type="button" id="f" onclick="setAnswer(6)">...</button>
+	<br />
+	<br />
+	<button type="button" onclick="previousQuestion()">Previous Question</button>
+	<br />
+	<button type="button" onclick="nextQuestion()">Next Question</button>
+	<br />
+	<button type="button" onclick="wrong()">WRONG</button>
+
+	<script type="text/javascript" src="questions.js"></script>
+	<script>
+		var myStorage = window.localStorage;
+		var currentQuestion = -1;
+
+		function setAnswer(id) {
+			localStorage.setItem('answer', JSON.stringify({
+				new: true,
+				id: id,
+				value: questions[currentQuestion]["answer" + id]
+			}));
+		}
+
+		function wrong() {
+			localStorage.setItem('answer', JSON.stringify({
+				wrong: true
+			}));
+		}
+
+
+		function previousQuestion() {
+			currentQuestion--;
+			updateQuestion();
+		}
+
+		function nextQuestion() {
+			currentQuestion++;
+			updateQuestion();
+		}
+
+		function updateQuestion() {
+			var question = questions[currentQuestion];
+			localStorage.setItem('question', JSON.stringify({
+				new: true,
+				value: question.question,
+				answer1: question.answer1,
+				answer2: question.answer2,
+				answer3: question.answer3,
+				answer4: question.answer4,
+				answer5: question.answer5,
+				answer6: question.answer6
+			}));
+			$('#q').text(question.question);
+			$('#a').text(question.answer1);
+			$('#b').text(question.answer2);
+			$('#c').text(question.answer3);
+			$('#d').text(question.answer4);
+			$('#e').text(question.answer5);
+			$('#f').text(question.answer6);
+		}
+
+		$(function () {
+			$.getJSON('questions.json', function (data) {
+				questions = data;
+			}).error(function () {
+				console.log('error');
+			});
+		});
+	</script>
+
+</body>
+
+</html>

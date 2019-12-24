@@ -1,0 +1,133 @@
+<html>
+  <head>
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.18.4/TweenMax.min.js"></script>
+  </head>
+  <link rel="stylesheet" type="text/css" href="feud.css" />
+
+  <body>
+    <img src="x.png" class="wrong" />
+    <div class="gameBoard">
+      <!--- Scores --->
+      <div class="questionHolder">
+        <span id="question" class="question">...</span>
+      </div>
+
+      <!--- Answers --->
+      <div class="colHolder">
+        <div class="col1"></div>
+        <div class="col2"></div>
+      </div>
+    </div>
+  </body>
+
+  <script>
+    var myStorage = window.localStorage;
+
+    setInterval(verify, 300);
+
+    function verify() {
+      verifyNewAnswer();
+      verifyNewQuestion();
+    }
+
+    function verifyNewAnswer() {
+      var answer = JSON.parse(localStorage.getItem("answer"));
+
+      if (answer) {
+        if (answer.new === true) {
+          playRightSound();
+          flipCorrectAnswer(answer.id);
+        } else if (answer.wrong === true) {
+          showWrongImage();
+          playWrongSound();
+        }
+
+        localStorage.setItem(
+          "answer",
+          JSON.stringify({
+            new: false,
+            wrong: false
+          })
+        );
+      }
+    }
+
+    function flipCorrectAnswer(id) {
+      var card = $(`#card${id}`);
+      var flipped = $(card).data("flipped");
+      var cardRotate = flipped ? 0 : -180;
+      TweenLite.to(card, 1, {
+        rotationX: cardRotate,
+        ease: Back.easeOut
+      });
+      flipped = !flipped;
+      $(card).data("flipped", flipped);
+    }
+
+    function verifyNewQuestion() {
+      var question = JSON.parse(localStorage.getItem("question"));
+
+      if (question && question.new === true) {
+        $("#question").text(question.value);
+
+        $(".col1").empty();
+        $(".col2").empty();
+
+        createAnswer(1, question.answer1);
+        createAnswer(2, question.answer2);
+        createAnswer(3, question.answer3);
+        createAnswer(4, question.answer4);
+        createAnswer(5, question.answer5);
+        createAnswer(6, question.answer6);
+
+        localStorage.setItem(
+          "question",
+          JSON.stringify({
+            new: false
+          })
+        );
+      }
+    }
+
+    function createAnswer(id, answer) {
+      var parent;
+      if (id % 2 === 0) {
+        parent = $(".col2");
+      } else {
+        parent = $(".col1");
+      }
+
+      $(`
+        <div class="cardHolder" style="perspective: 800px;">
+            <div id="card${id}" class="card" style="transform-style: preserve-3d;">
+                <div class="front" style="backface-visibility: hidden;"><span class="DBG">${id}</span></div>
+                <div class="back DBG"
+                    style="transform: matrix3d(1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1); backface-visibility: hidden;">
+                    <span>${answer}</span>
+                </div>
+            </div>
+        </div>
+        `).appendTo(parent);
+    }
+
+    function playRightSound() {
+      var audioElement = document.createElement("audio");
+      audioElement.setAttribute("src", "right.wav");
+      audioElement.play();
+    }
+
+    function showWrongImage() {
+      $(".wrong").show();
+      setTimeout(() => {
+        $(".wrong").hide();
+      }, 2000);
+    }
+
+    function playWrongSound() {
+      var audioElement = document.createElement("audio");
+      audioElement.setAttribute("src", "wrong.mp3");
+      audioElement.play();
+    }
+  </script>
+</html>
